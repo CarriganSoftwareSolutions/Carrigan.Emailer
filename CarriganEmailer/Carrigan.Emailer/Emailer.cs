@@ -213,7 +213,7 @@ public class Emailer
     public async Task<EmailerResults> SendEmailsAsync(params IEnumerable<EmailMessage> emails)
     {
         EmailerConfigurationException.ThrowIfNull(_configuration);
-        EmailerResults results = null;
+        EmailerResults? results = null;
         if (_configuration.UsePickupDirectory)
             results = await WriteEmailsToPickupDirectoryAsync(emails);
         if(_configuration.UseNetworkDelivery ?? throw new FormatException($"E-mailer configuration error. {nameof(_configuration.UseNetworkDelivery)} is null, please set a valid value."))
