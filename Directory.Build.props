@@ -1,0 +1,50 @@
+<Project>
+  <PropertyGroup>
+    <Company>Carrigan Software Solutions LLC</Company>
+    <Authors>Carrigan Software Solutions LLC</Authors>
+
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <_CurrentYear>$([System.DateTime]::UtcNow.ToString('yyyy'))</_CurrentYear>
+    <Copyright>© $(_CurrentYear) $(Company)</Copyright>
+
+    <RepositoryUrl>https://github.com/CarriganSoftwareSolutions/Carrigan.Emailer</RepositoryUrl>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    <Deterministic>true</Deterministic>
+
+    <!-- PreRelease Status -->
+    <PreReleaseLabel>alpha</PreReleaseLabel>
+
+    <!--Base Version for other projects-->
+    <BaseVersion>0.1.0</BaseVersion>
+    <!-- Base version: x.y.z For Carrigan.Core -->
+    <EmailerVersionBase>0.1.0</EmailerVersionBase>
+    
+    <!-- Time Stamp -->
+    <BuildTimeStamp>$([System.DateTime]::UtcNow.ToString('yyyyMMddHHmm'))</BuildTimeStamp>
+
+    <!-- Pick base/label by package -->
+    <BaseVersion Condition="'$(PackageId)'=='Carrigan.Emailer'">$(EmailerVersionBase)</BaseVersion>
+
+
+    <PreReleasePart Condition="'$(PreReleaseLabel)' != ''">-$(PreReleaseLabel).$(BuildTimeStamp)</PreReleasePart>
+
+    <!-- Final version -->
+    <Version>$(BaseVersion)$(PreReleasePart)</Version>
+    <PackageVersion>$(Version)</PackageVersion>
+    
+    <GitRemote>origin</GitRemote>
+    <GitVersion>false</GitVersion>
+  
+</PropertyGroup>
+  
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)LICENSE"
+          Pack="true"
+          PackagePath="">
+      <Link>LICENSE</Link>
+    </None>
+  </ItemGroup>
+</Project>

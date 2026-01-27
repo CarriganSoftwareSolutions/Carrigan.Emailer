@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>Carrigan.Emailer</PackageId>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <Description>
+      Carrigan.Emailer is a configuration-driven email sender for .NET using MailKit.
+      Supports SMTP network delivery and optional pickup-directory (.eml) output, multi-account grouping by host/sender, List-Unsubscribe header support, and ILogger-based diagnostics.
+    </Description>
+
+    <PackageTags>email;smtp;mailer;mailkit;mime;pickup-directory;eml;logging;dotnet</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Carrigan.Core" Version="0.1.0-alpha.202601172327" />
+    <PackageReference Include="MailKit" Version="4.14.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />
+  </ItemGroup>
+
+</Project>
