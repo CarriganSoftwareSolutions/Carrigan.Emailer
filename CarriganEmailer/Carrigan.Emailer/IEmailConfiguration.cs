@@ -6,8 +6,7 @@ public interface IEmailConfiguration
 {
     public EmailAddress? DefaultAccount { get; set; }
     public string? GetPasswordForAccount(string accountAddress);
-    public Dictionary<string, int> Hosts { get; set; }
-    public Dictionary<string, string> HostMappings { get; set; }
+    public IEnumerable<EmailDomainSmtpEndpoint> EmailDomainSmtpEndpoints { get; set; }
     public SecurityEnum? SecurityOption { get; set; }
     public string? PickupDirectory { get; set; }
     public bool UsePickupDirectory { get; set; }

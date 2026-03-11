@@ -12,18 +12,18 @@ namespace Carrigan.Emailer;
 public class Emailer
 {
     private static IEmailConfiguration? _configuration;
-    private ILogger<Emailer> _logger;
+    private static EmailDomainSmtpLookup? _configuationSmptEndPoints;
+    private readonly ILogger<Emailer> _logger;
 
     public static void ValidateConfiguration(IEmailConfiguration configuration)
     {
         EmailerConfigurationException.ThrowIfConfigurationError(configuration);
         _configuration = configuration;
+        _configuationSmptEndPoints = new(configuration.EmailDomainSmtpEndpoints);
     }
 
-    public Emailer(ILogger<Emailer> logger)
-    {
+    public Emailer(ILogger<Emailer> logger) => 
         _logger = logger;
-    }
 
     protected static SecureSocketOptions GetSocketSecurityOption()
     {
@@ -109,7 +109,7 @@ public class Emailer
     {
         EmailerConfigurationException.ThrowIfNull(_configuration);
         EmailerResults results = new();
-        EmailAddress defaultFrom = _configuration.DefaultAccount;
+        EmailAddress? defaultFrom = _configuration.DefaultAccount;
         foreach(EmailMessage email in emails)
         {
             email.From ??= defaultFrom;
@@ -122,40 +122,37 @@ public class Emailer
                 using SmtpClient client = new();
                 try
                 {
-                    string host = hostGroup.Key;
-                    string mappedHost = _configuration.HostMappings.TryGetValue(host, out string? hostMapping) ? hostMapping : host;
+                    string emailDomain = hostGroup.Key;
+                    EmailDomainSmtpEndpoint? emailDomainSmtpEndpoint = _configuationSmptEndPoints?.Lookup(emailDomain) ?? throw new NullReferenceException($"Attempted to send an email from a domain name, {emailDomain}, that doesn't have a mapped SMPT server.");
+                    string smptServerHost = emailDomainSmtpEndpoint.SmtpServer;
+                    int smptPort = emailDomainSmtpEndpoint.SmtpPort;
                     SecureSocketOptions secureSocketOption = GetSocketSecurityOption();
                     string secureSocketOptionString = secureSocketOption.ToString();
-                    int? port = _configuration.Hosts?[host];
                     try
                     {
-                        port = _configuration.Hosts?[host] ?? throw new NullReferenceException("No port was provided for the SMTP host.");
-                        if (port is not null)
+                        await client.ConnectAsync(smptServerHost, smptPort, secureSocketOption);
+                        // Now group within the host by sender address
+                        foreach (IGrouping<string, EmailMessage> addressGroup in hostGroup.GroupBy(email => email.From?.Address ?? throw new NullReferenceException("All emails require a from address.")))
                         {
-                            await client.ConnectAsync(mappedHost, port.Value, secureSocketOption);
-                            // Now group within the host by sender address
-                            foreach (IGrouping<string, EmailMessage> addressGroup in hostGroup.GroupBy(email => email.From?.Address ?? throw new NullReferenceException("All emails require a from address.")))
+                            string emailAddress = addressGroup.Key;
+                            try
                             {
-                                string emailAddress = addressGroup.Key;
-                                try
+                                await client.AuthenticateAsync(emailAddress, _configuration.GetPasswordForAccount(emailAddress) ?? string.Empty);
+                                foreach (EmailMessage email in addressGroup)
                                 {
-                                    await client.AuthenticateAsync(emailAddress, _configuration.GetPasswordForAccount(emailAddress) ?? string.Empty);
-                                    foreach (EmailMessage email in addressGroup)
-                                    {
-                                        results.Add(await SendEmailNetworkAsync(email, client));
-                                    }
+                                    results.Add(await SendEmailNetworkAsync(email, client));
                                 }
-                                catch (Exception ex)
-                                {
-                                    _logger.LogError(ex, "Attempt to send emails from the account, {emailAddress}, failed.", emailAddress);
-                                    results.AccountErrors.Add(ex);
-                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, "Attempt to send emails from the account, {emailAddress}, failed.", emailAddress);
+                                results.AccountErrors.Add(ex);
                             }
                         }
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Attempt to send emails from the host, {mappedHost}, on port, {port}, using Secure Socket Option, {secureSocketOptionString}, failed.", mappedHost, port, secureSocketOptionString.ToString());
+                        _logger.LogError(ex, "Attempt to send emails from the host, {smptServerHost}, on port, {smptServerHost}, using Secure Socket Option, {secureSocketOptionString}, failed.", smptServerHost, smptPort, secureSocketOptionString.ToString());
                         results.HostErrors.Add(ex);
                     }
                     await client.DisconnectAsync(true);

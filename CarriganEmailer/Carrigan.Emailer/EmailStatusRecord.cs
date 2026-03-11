@@ -17,10 +17,8 @@ internal class EmailStatusRecord
         EmailId = emailId;
     }
 
-    public EmailStatusRecord(EmailStatusEnum status, Guid emailId, Exception ex) : this(status, emailId, null, ex)
-    {
+    public EmailStatusRecord(EmailStatusEnum status, Guid emailId, Exception ex) : this(status, emailId, null, ex) => 
         Ex = ex;
-    }
 
     public EmailStatusEnum Status { get; set; }
     public Guid EmailId { get; set; }
