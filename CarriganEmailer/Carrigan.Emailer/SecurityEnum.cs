@@ -1,5 +1,5 @@
-﻿
-namespace Carrigan.Emailer;
+﻿namespace Carrigan.Emailer;
+
 public enum SecurityEnum
 {
     None,
