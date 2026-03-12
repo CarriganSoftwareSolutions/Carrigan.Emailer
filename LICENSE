@@ -1,7 +1,7 @@
 Carrigan.Emailer
 and related projects
 
-Copyright 2025 Carrigan Software Solutions LLC
+Copyright 2026 Carrigan Software Solutions LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -33,16 +33,21 @@ Those packages are licensed separately as follows:
     https://github.com/dotnet/dotnet/blob/main/LICENSE.TXT
 
 - MailKit
-    © .NET Foundation and Contributors
+    © Jeffrey Stedfast
     Licensed under the MIT License
     https://www.nuget.org/packages/MailKit/
     https://github.com/jstedfast/MailKit/blob/master/LICENSE
 
 - MimeKit (dependency of MailKit)
-    © .NET Foundation and Contributors
+    © Jeffrey Stedfast
     Licensed under the MIT License
     https://www.nuget.org/packages/MimeKit/
     https://github.com/jstedfast/MimeKit/blob/master/LICENSE
+
+- Microsoft.SourceLink.GitHub
+  © .NET Foundation and Contributors
+  Licensed under the MIT License
+  https://github.com/dotnet/sourcelink/blob/main/LICENSE
 
 - Carrigan.Core
     © Carrigan Software Solutions LLC
