@@ -13,7 +13,7 @@ public class Emailer
 {
     private static IEmailConfiguration? _configuration;
     private static EmailDomainSmtpLookup? _configuationSmptEndPoints;
-    private readonly ILogger<Emailer> _logger;
+    private readonly ILogger<Emailer>? _logger;
 
     public static void ValidateConfiguration(IEmailConfiguration configuration)
     {
@@ -22,7 +22,7 @@ public class Emailer
         _configuationSmptEndPoints = new(configuration.EmailDomainSmtpEndpoints);
     }
 
-    public Emailer(ILogger<Emailer> logger) => 
+    public Emailer(ILogger<Emailer>? logger = null) => 
         _logger = logger;
 
     protected static SecureSocketOptions GetSocketSecurityOption()
@@ -90,17 +90,17 @@ public class Emailer
         catch (SmtpCommandException ex) when (ex.StatusCode == SmtpStatusCode.MailboxUnavailable)
         {
             string failedAddress = ex.Mailbox.Address;
-            _logger.LogError(ex, "Permanent delivery failure for email address: {failedAddress} for email id of {emailId}", failedAddress, emailId);
+            _logger?.LogError(ex, "Permanent delivery failure for email address: {failedAddress} for email id of {emailId}", failedAddress, emailId);
             return new EmailStatusRecord(EmailStatusEnum.PermanentAddressFailure, email.Id, new EmailAddress(failedAddress), ex);
         }
         catch (Exception ex) when (ex is ArgumentException || ex is ArgumentNullException || ex is InvalidOperationException)
         {
-            _logger.LogError(ex, "Email id of {emailId} failed due to a possible formatting error.", emailId);
+            _logger?.LogError(ex, "Email id of {emailId} failed due to a possible formatting error.", emailId);
             return new EmailStatusRecord(EmailStatusEnum.PermanentFormatFailure, email.Id, ex);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Email id of {emailId} failed and will be retried later if it hasn't expired.", emailId);
+            _logger?.LogError(ex, "Email id of {emailId} failed and will be retried later if it hasn't expired.", emailId);
             return new EmailStatusRecord(EmailStatusEnum.TransientFailure, email.Id, ex);
         }
     }
@@ -145,28 +145,28 @@ public class Emailer
                             }
                             catch (Exception ex)
                             {
-                                _logger.LogError(ex, "Attempt to send emails from the account, {emailAddress}, failed.", emailAddress);
+                                _logger?.LogError(ex, "Attempt to send emails from the account, {emailAddress}, failed.", emailAddress);
                                 results.AccountErrors.Add(ex);
                             }
                         }
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Attempt to send emails from the host, {smptServerHost}, on port, {smptServerHost}, using Secure Socket Option, {secureSocketOptionString}, failed.", smptServerHost, smptPort, secureSocketOptionString.ToString());
+                        _logger?.LogError(ex, "Attempt to send emails from the host, {smptServerHost}, on port, {smptServerHost}, using Secure Socket Option, {secureSocketOptionString}, failed.", smptServerHost, smptPort, secureSocketOptionString.ToString());
                         results.HostErrors.Add(ex);
                     }
                     await client.DisconnectAsync(true);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "An Error Occurred");
+                    _logger?.LogError(ex, "An Error Occurred");
                     results.OtherErrors.Add(ex);
                 }
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An Error Occurred");
+            _logger?.LogError(ex, "An Error Occurred");
             results.OtherErrors.Add(ex);
         }
         return results;
