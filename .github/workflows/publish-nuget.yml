@@ -62,6 +62,14 @@ jobs:
             dotnet nuget push "%%F" --api-key "%NUGET_API_KEY%" --source %NUGET_SOURCE% --skip-duplicate
           )
 
-      - name: Publish to local feed
+      - name: Publish packages to local feed
         run: |
-          dotnet nuget push .\artifacts\*.nupkg --source "C:\LocalNuGet" --skip-duplicate
+          for %%F in (.\artifacts\*.nupkg) do (
+            echo %%~nxF | findstr /i /v ".snupkg" >nul && dotnet nuget push "%%F" --source "C:\LocalNuGet" --skip-duplicate
+          )
+
+      - name: Publish symbols to local feed
+        run: |
+          for %%F in (.\artifacts\*.snupkg) do (
+            dotnet nuget push "%%F" --source "C:\LocalNuGet" --skip-duplicate
+          )
