@@ -7,6 +7,13 @@
     <_CurrentYear>$([System.DateTime]::UtcNow.ToString('yyyy'))</_CurrentYear>
     <Copyright>© $(_CurrentYear) $(Company)</Copyright>
 
+
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+
+
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <RepositoryUrl>https://github.com/CarriganSoftwareSolutions/Carrigan.Emailer</RepositoryUrl>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     
