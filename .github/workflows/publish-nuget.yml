@@ -44,7 +44,7 @@ jobs:
         run: dotnet build CarriganEmailer\CarriganEmailer.slnx --configuration Release --no-restore
 
       - name: Pack solution
-        run: dotnet pack CarriganEmailer\CarriganEmailer.slnx --configuration Release --no-build -o .\artifacts
+        run: dotnet pack CarriganEmailer\CarriganEmailer.slnx --configuration Release --no-build -o .\artifacts --include-source -p:SymbolPackageFormat=snupkg
 
       - name: Publish to NuGet
         env:
