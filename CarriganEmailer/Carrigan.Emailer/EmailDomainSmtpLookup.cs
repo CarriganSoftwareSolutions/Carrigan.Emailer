@@ -45,7 +45,7 @@ internal sealed class EmailDomainSmtpLookup
                 }
 
                 if (endpoint.EmailDomain.IsNotNullOrWhiteSpace()
-                    && endpoint.SmtpServer.IsNullOrWhiteSpace()
+                    && endpoint.SmtpServer.IsNotNullOrWhiteSpace()
                     && endpoint.SmtpPort > 0
                     && dictionary.DoesNotContainKey(endpoint.EmailDomain))
                 {
