@@ -61,17 +61,35 @@ public sealed class EmailerConfigurationException : Exception
 
         List<Exception> exceptions = [];
 
-        try
+
+
+        // Validate network delivery settings.
+        if (configuration.UseNetworkDelivery is null)
         {
-            domainSmtpLookup = new(configuration.EmailDomainSmtpEndpoints);
+            exceptions.Add(CaptureException(
+                new FormatException($"{nameof(configuration.UseNetworkDelivery)} is null. Please set a valid value.")));
         }
-        catch(AggregateException ex)
+        else if (configuration.UseNetworkDelivery == false && configuration.UsePickupDirectory == false)
         {
-            exceptions.AddRange(ex.InnerExceptions);
+            exceptions.Add(CaptureException(
+                new FormatException($"No delivery method enabled. Please enable either {nameof(configuration.UseNetworkDelivery)} or {nameof(configuration.UsePickupDirectory)}.")));
         }
-        catch(Exception ex)
+        
+        
+        if (configuration.UseNetworkDelivery ?? false)
         {
-            exceptions.Add(ex);
+            try
+            {
+                domainSmtpLookup = new(configuration.EmailDomainSmtpEndpoints);
+            }
+            catch (AggregateException ex)
+            {
+                exceptions.AddRange(ex.InnerExceptions);
+            }
+            catch (Exception ex)
+            {
+                exceptions.Add(ex);
+            }
         }
 
         // Validate DefaultAccount and related properties.
@@ -87,21 +105,24 @@ public sealed class EmailerConfigurationException : Exception
         {
             exceptions.Add(CaptureException(new FormatException($"{nameof(configuration.DefaultAccount.Address)} is empty or white space. You must provide a default email account.")));
         }
-        else if (configuration.DefaultAccount.Host.IsNullOrWhiteSpace())
+        else if(configuration.UseNetworkDelivery ?? false)
         {
-            exceptions.Add(CaptureException(new FormatException($"{nameof(configuration.DefaultAccount.Host)} is null, empty or white space. You must provide a valid default email account.")));
-        }
-        else
-        {
-            if (configuration.GetPasswordForAccount(configuration.DefaultAccount.Address).IsNullOrWhiteSpace())
+            if (configuration.DefaultAccount.Host.IsNullOrWhiteSpace())
             {
-                exceptions.Add(CaptureException(new FormatException("You must provide a password for the default email account.")));
+                exceptions.Add(CaptureException(new FormatException($"{nameof(configuration.DefaultAccount.Host)} is null, empty or white space. You must provide a valid default email account.")));
             }
-            if (configuration.EmailDomainSmtpEndpoints
-                    .Where(domain => domain.EmailDomain.Equals(configuration.DefaultAccount.Host, StringComparison.OrdinalIgnoreCase))
-                    .None())
+            else
             {
-                exceptions.Add(CaptureException(new FormatException("You must provide an SMTP endpoint for the default email account.")));
+                if (configuration.GetPasswordForAccount(configuration.DefaultAccount.Address).IsNullOrWhiteSpace())
+                {
+                    exceptions.Add(CaptureException(new FormatException("You must provide a password for the default email account.")));
+                }
+                if (configuration.EmailDomainSmtpEndpoints
+                        .Where(domain => domain.EmailDomain.Equals(configuration.DefaultAccount.Host, StringComparison.OrdinalIgnoreCase))
+                        .None())
+                {
+                    exceptions.Add(CaptureException(new FormatException("You must provide an SMTP endpoint for the default email account.")));
+                }
             }
         }
 
@@ -139,38 +160,30 @@ public sealed class EmailerConfigurationException : Exception
             }
         }
 
-        // Validate security option.
-        if (configuration.SecurityOption is null)
+        if (configuration.UseNetworkDelivery ?? false)
         {
-            exceptions.Add(CaptureException(
-                new FormatException($"{nameof(configuration.SecurityOption)} is null. Please ensure you provided a properly formatted value.")));
-        }
-        else
-        {
-            switch (configuration.SecurityOption)
+            // Validate security option.
+            if (configuration.SecurityOption is null)
             {
-                case SecurityEnum.Auto:
-                case SecurityEnum.Ssl:
-                case SecurityEnum.Tls:
-                case SecurityEnum.None:
-                    break;
-                default:
-                    exceptions.Add(CaptureException(new InvalidEnumArgumentException($"Invalid security option")));
-                    break;
+                exceptions.Add(CaptureException(
+                    new FormatException($"{nameof(configuration.SecurityOption)} is null. Please ensure you provided a properly formatted value.")));
+            }
+            else
+            {
+                switch (configuration.SecurityOption)
+                {
+                    case SecurityEnum.Auto:
+                    case SecurityEnum.Ssl:
+                    case SecurityEnum.Tls:
+                    case SecurityEnum.None:
+                        break;
+                    default:
+                        exceptions.Add(CaptureException(new InvalidEnumArgumentException($"Invalid security option")));
+                        break;
+                }
             }
         }
 
-        // Validate network delivery settings.
-        if (configuration.UseNetworkDelivery is null)
-        {
-            exceptions.Add(CaptureException(
-                new FormatException($"{nameof(configuration.UseNetworkDelivery)} is null. Please set a valid value.")));
-        }
-        else if (configuration.UseNetworkDelivery == false && configuration.UsePickupDirectory == false)
-        {
-            exceptions.Add(CaptureException(
-                new FormatException($"No delivery method enabled. Please enable either {nameof(configuration.UseNetworkDelivery)} or {nameof(configuration.UsePickupDirectory)}.")));
-        }
 
         // Throw the custom exception based on the number of errors discovered.
         if (exceptions.Count == 1)
