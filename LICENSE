@@ -16,46 +16,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 ---------------------------------------------------------------------
-THIRD-PARTY DEPENDENCIES AND ATTRIBUTIONS
-
-This project includes projects that depend on external packages.  
-Those packages are licensed separately as follows:
-
-- Microsoft.NETCore.App  
-    © Microsoft Corporation  
-    Licensed under the MIT License  
-    https://github.com/dotnet/runtime/blob/main/LICENSE.TXT  
-
-- Microsoft.Extensions.Logging.Abstractions
-    © .NET Foundation and Contributors
-    Licensed under the MIT License
-    https://www.nuget.org/packages/Microsoft.Extensions.Logging.Abstractions/
-    https://github.com/dotnet/dotnet/blob/main/LICENSE.TXT
-
-- MailKit
-    © Jeffrey Stedfast
-    Licensed under the MIT License
-    https://www.nuget.org/packages/MailKit/
-    https://github.com/jstedfast/MailKit/blob/master/LICENSE
-
-- MimeKit (dependency of MailKit)
-    © Jeffrey Stedfast
-    Licensed under the MIT License
-    https://www.nuget.org/packages/MimeKit/
-    https://github.com/jstedfast/MimeKit/blob/master/LICENSE
-
-- Microsoft.SourceLink.GitHub
-  © .NET Foundation and Contributors
-  Licensed under the MIT License
-  https://github.com/dotnet/sourcelink/blob/main/LICENSE
-
-- Carrigan.Core
-    © Carrigan Software Solutions LLC
-    Licensed under the Apache License, Version 2.0 
-    https://github.com/CarriganSoftwareSolutions/Carrigan.Core/blob/main/CarriganCore/LICENSE
-
-
----------------------------------------------------------------------
 
 Full text of Apache License 2.0 as follows:
 
