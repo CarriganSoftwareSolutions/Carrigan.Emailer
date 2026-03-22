@@ -21,7 +21,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Carrigan.Core" Version="0.1.0-alpha.202603220932" />
+    <PackageReference Include="Carrigan.Core" Version="0.1.0-alpha.202603221000" />
     <PackageReference Include="MailKit" Version="4.15.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.5" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.201" PrivateAssets="All" />
