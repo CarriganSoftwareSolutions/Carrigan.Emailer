@@ -47,6 +47,12 @@ public class Emailer
         mimeMessage.From.Add(new MailboxAddress(from?.DisplayName ?? string.Empty, from?.Address ?? throw new NullReferenceException("All emails require a from address.")));
 
         mimeMessage.To.AddRange(email.To.Select(to => new MailboxAddress(to.DisplayName, to.Address)));
+        if(email.Cc.Any())
+            mimeMessage.Cc.AddRange(email.Cc.Select(cc => new MailboxAddress(cc.DisplayName, cc.Address)));
+        if(email.Bcc.Any())
+            mimeMessage.Bcc.AddRange(email.Bcc.Select(bcc => new MailboxAddress(bcc.DisplayName, bcc.Address)));
+        if(email.ReplyTo.Any())
+            mimeMessage.ReplyTo.AddRange(email.ReplyTo.Select(replyTo => new MailboxAddress(replyTo.DisplayName, replyTo.Address)));
         mimeMessage.Subject = email.Subject;
 
         if (email.HtmlBody.IsNotNullOrWhiteSpace() && email.TextBody.IsNotNullOrWhiteSpace())
