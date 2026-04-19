@@ -95,7 +95,7 @@ public class Emailer
         }
         catch (SmtpCommandException ex) when (ex.StatusCode == SmtpStatusCode.MailboxUnavailable)
         {
-            string failedAddress = ex.Mailbox.Address;
+            string failedAddress = ex.Mailbox?.Address ?? "null";
             _logger?.LogError(ex, "Permanent delivery failure for email address: {failedAddress} for email id of {emailId}", failedAddress, emailId);
             return new EmailStatusRecord(EmailStatusEnum.PermanentAddressFailure, email.Id, new EmailAddress(failedAddress), ex);
         }
