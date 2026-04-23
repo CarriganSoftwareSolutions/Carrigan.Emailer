@@ -2,74 +2,185 @@ name: Publish to NuGet (version/0.x)
 
 on:
   push:
-    branches: [ version/0.x ]
+    branches:
+      - version/0.x
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-nuget-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  build-pack-publish:
-    runs-on: self-hosted
-    env:
-      NUGET_SOURCE: https://api.nuget.org/v3/index.json
-      DOTNET_INSTALL_DIR: C:\actions-runner\dotnet   
-      DOTNET_ROOT: C:\actions-runner\dotnet
-    defaults:
-      run:
-        shell: cmd
+  validate:
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
-      - name: Debug Git presence
-        run: |
-          where git
-          git --version
-
-      - name: Ensure dotnet install directory exists
-        run: if not exist "C:\actions-runner\dotnet" mkdir "C:\actions-runner\dotnet"
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Setup .NET SDKs
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '10.0.x'
-                    
-      - name: dotnet info
-        run: dotnet --info
+          dotnet-version: |
+            9.0.x
+            10.0.x
 
       - name: Restore
-        run: dotnet restore CarriganEmailer\CarriganEmailer.slnx
+        run: dotnet restore CarriganEmailer/CarriganEmailer.sln
 
-      - name: Build (Release)
-        run: dotnet build CarriganEmailer\CarriganEmailer.slnx --configuration Release --no-restore
+      - name: Build
+        run: dotnet build CarriganEmailer/CarriganEmailer.sln --configuration Release --no-restore
+
+      - name: Test
+        run: >-
+          dotnet test CarriganEmailer/Carrigan.Emailer.Test/Carrigan.Emailer.Test.csproj
+          --configuration Release
+          --no-build
+          --collect:"XPlat Code Coverage"
+          --logger "trx;LogFileName=test-results.trx"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results
+          path: |
+            **/TestResults/**/*.trx
+            **/TestResults/**/coverage.cobertura.xml
+          if-no-files-found: warn
+
+  build-pack:
+    needs: validate
+    runs-on: ubuntu-latest
+    outputs:
+      is_alpha: ${{ steps.package_kind.outputs.is_alpha }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET SDKs
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            9.0.x
+            10.0.x
+
+      - name: Restore
+        run: dotnet restore CarriganEmailer/CarriganEmailer.sln
+
+      - name: Build
+        run: dotnet build CarriganEmailer/CarriganEmailer.sln --configuration Release --no-restore
 
       - name: Pack solution
-        run: dotnet pack CarriganEmailer\CarriganEmailer.slnx --configuration Release --no-build -o .\artifacts --include-symbols -p:SymbolPackageFormat=snupkg
+        run: >-
+          dotnet pack CarriganEmailer/CarriganEmailer.sln
+          --configuration Release
+          --no-build
+          -o ./artifacts
+          --include-symbols
+          -p:SymbolPackageFormat=snupkg
+
+      - name: Detect alpha packages
+        id: package_kind
+        shell: bash
+        run: |
+          if find ./artifacts -maxdepth 1 -type f -name '*.nupkg' ! -name '*.snupkg' -print | grep -qi -- '-alpha\.'; then
+            echo "is_alpha=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_alpha=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload NuGet packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: nuget-packages
+          path: |
+            ./artifacts/*.nupkg
+            ./artifacts/*.snupkg
+          if-no-files-found: error
+          retention-days: 30
+
+  publish-alpha:
+    needs: build-pack
+    if: needs.build-pack.outputs.is_alpha == 'true'
+    runs-on: ubuntu-latest
+    env:
+      NUGET_SOURCE: https://api.nuget.org/v3/index.json
+      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+
+    steps:
+      - name: Download NuGet packages
+        uses: actions/download-artifact@v8
+        with:
+          name: nuget-packages
+          path: ./artifacts
 
       - name: Publish packages to NuGet
-        env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        shell: bash
         run: |
-          for %%F in (.\artifacts\*.nupkg) do (
-            echo %%~nxF | findstr /i /v ".snupkg" >nul && dotnet nuget push "%%F" --api-key "%NUGET_API_KEY%" --source %NUGET_SOURCE% --skip-duplicate
-          )
+          find ./artifacts -maxdepth 1 -type f -name '*.nupkg' ! -name '*.snupkg' -print0 |
+          while IFS= read -r -d '' file; do
+            dotnet nuget push "$file" \
+              --api-key "$NUGET_API_KEY" \
+              --source "$NUGET_SOURCE" \
+              --skip-duplicate \
+              --no-symbols
+          done
 
       - name: Publish symbols to NuGet
-        env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        shell: bash
         run: |
-          for %%F in (.\artifacts\*.snupkg) do (
-            dotnet nuget push "%%F" --api-key "%NUGET_API_KEY%" --source %NUGET_SOURCE% --skip-duplicate
-          )
+          find ./artifacts -maxdepth 1 -type f -name '*.snupkg' -print0 |
+          while IFS= read -r -d '' file; do
+            dotnet nuget push "$file" \
+              --api-key "$NUGET_API_KEY" \
+              --source "$NUGET_SOURCE" \
+              --skip-duplicate
+          done
 
-      - name: Publish packages to local feed
-        run: |
-          for %%F in (.\artifacts\*.nupkg) do (
-            echo %%~nxF | findstr /i /v ".snupkg" >nul && dotnet nuget push "%%F" --source "C:\LocalNuGet" --skip-duplicate
-          )
+  publish-release:
+    needs: build-pack
+    if: needs.build-pack.outputs.is_alpha != 'true'
+    runs-on: ubuntu-latest
+    environment: nuget-release
+    env:
+      NUGET_SOURCE: https://api.nuget.org/v3/index.json
+      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
-      - name: Publish symbols to local feed
+    steps:
+      - name: Download NuGet packages
+        uses: actions/download-artifact@v8
+        with:
+          name: nuget-packages
+          path: ./artifacts
+
+      - name: Publish packages to NuGet
+        shell: bash
         run: |
-          for %%F in (.\artifacts\*.snupkg) do (
-            dotnet nuget push "%%F" --source "C:\LocalNuGet" --skip-duplicate
-          )
+          find ./artifacts -maxdepth 1 -type f -name '*.nupkg' ! -name '*.snupkg' -print0 |
+          while IFS= read -r -d '' file; do
+            dotnet nuget push "$file" \
+              --api-key "$NUGET_API_KEY" \
+              --source "$NUGET_SOURCE" \
+              --skip-duplicate \
+              --no-symbols
+          done
+
+      - name: Publish symbols to NuGet
+        shell: bash
+        run: |
+          find ./artifacts -maxdepth 1 -type f -name '*.snupkg' -print0 |
+          while IFS= read -r -d '' file; do
+            dotnet nuget push "$file" \
+              --api-key "$NUGET_API_KEY" \
+              --source "$NUGET_SOURCE" \
+              --skip-duplicate
+          done

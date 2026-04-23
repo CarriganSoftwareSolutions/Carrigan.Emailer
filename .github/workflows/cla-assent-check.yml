@@ -1,0 +1,19 @@
+name: CLA Assent Check
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  cla-assent-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify required CLA assent statement is present
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          printf '%s' "$PR_BODY" | grep -Eq 'I have read and agree to the Contributor Assignment Agreement in CLA\.md\.[[:space:]]*Signed electronically:[[:space:]]*[^[:space:]].+'

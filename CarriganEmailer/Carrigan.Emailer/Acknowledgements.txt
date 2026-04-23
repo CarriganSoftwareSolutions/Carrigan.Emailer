@@ -15,6 +15,28 @@ and upstream project repositories.
     Licensed under the MIT License  
     https://github.com/dotnet/runtime/blob/main/LICENSE.TXT  
     https://github.com/dotnet/runtime/blob/main/THIRD-PARTY-NOTICES.TXT
+
+- coverlet.collector  
+    © Contributors  
+    Licensed under the MIT License  
+    https://github.com/coverlet-coverage/coverlet/blob/master/LICENSE
+    https://github.com/coverlet-coverage/coverlet/blob/master/THIRD-PARTY-NOTICES.txt
+
+- Microsoft.NET.Test.Sdk  
+    © Microsoft Corporation  
+    Licensed under the MIT License  
+    https://github.com/microsoft/vstest/blob/main/LICENSE
+    https://github.com/microsoft/vstest/blob/main/THIRD-PARTY-NOTICES.txt
+
+- xUnit  
+    © James Newkirk, Brad Wilson, and xUnit contributors  
+    Licensed under the Apache License, Version 2.0  
+    https://github.com/xunit/xunit/blob/main/LICENSE
+
+- xunit.runner.visualstudio  
+    © xUnit contributors  
+    Licensed under the Apache License, Version 2.0  
+    https://github.com/xunit/visualstudio.xunit/blob/main/License.txt
     
 - MailKit
     © Jeffrey Stedfast

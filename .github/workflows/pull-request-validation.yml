@@ -1,0 +1,51 @@
+name: Pull Request Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+      - version/**
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup .NET SDKs
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            9.0.x
+            10.0.x
+
+      - name: Restore
+        run: dotnet restore CarriganEmailer/CarriganEmailer.sln
+
+      - name: Build
+        run: dotnet build CarriganEmailer/CarriganEmailer.sln --configuration Release --no-restore
+
+      # - name: Test
+      #   run: >-
+      #     dotnet test CarriganEmailer/Carrigan.Emailer.Test/Carrigan.Emailer.Test.csproj
+      #     --configuration Release
+      #     --no-build
+      #     --collect:"XPlat Code Coverage"
+      #     --logger "trx;LogFileName=test-results.trx"
+
+      # - name: Upload test results
+      #   if: always()
+      #   uses: actions/upload-artifact@v7
+      #   with:
+      #     name: test-results
+      #     path: |
+      #       **/TestResults/**/*.trx
+      #       **/TestResults/**/coverage.cobertura.xml
+      #     if-no-files-found: warn
