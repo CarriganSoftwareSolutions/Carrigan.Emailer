@@ -146,3 +146,9 @@ Licensed under the Apache License, Version 2.0. See `LICENSE`.
 ## Additional repository files
 
 Depending on where this repository is hosted and how organization-wide defaults are configured, contribution and community-health files may also be supplied through a separate `.github` repository.
+
+## Support Development
+
+If this package helps you, consider supporting development:
+
+https://github.com/sponsors/CarriganSoftwareSolutions

@@ -260,3 +260,9 @@ If sending fails, it throws an `AggregateException` containing the underlying er
 ## Current repository status
 
 The repository includes a test project, but it is currently a scaffold for future unit tests rather than a mature coverage suite.
+
+## Support Development
+
+If this package helps you, consider supporting development:
+
+https://github.com/sponsors/CarriganSoftwareSolutions
