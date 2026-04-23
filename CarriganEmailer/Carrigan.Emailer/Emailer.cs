@@ -9,12 +9,52 @@ using System.ComponentModel;
 
 namespace Carrigan.Emailer;
 
+/// <remarks>
+/// This library provides technical email-delivery functionality only.
+/// It does not by itself make an application compliant with anti-spam laws,
+/// privacy laws, consent requirements, unsubscribe requirements, retention rules,
+/// provider policies, or other legal, regulatory, contractual, or organizational obligations.
+///
+/// Applications using this library remain responsible for:
+/// <list type="bullet">
+/// <item><description>obtaining any required consent or authorization before sending email,</description></item>
+/// <item><description>providing any required notices, sender identification, or unsubscribe handling,</description></item>
+/// <item><description>complying with applicable retention, deletion, privacy, and security requirements, and</description></item>
+/// <item><description>following the rules and technical requirements of the selected email provider or delivery environment.</description></item>
+/// </list>
+///
+/// Where this library writes message data to disk, logs, or other storage locations,
+/// those outputs may contain recipient addresses, sender addresses, message bodies,
+/// attachments, links, or other sensitive information. The consuming application is
+/// responsible for securing those locations, controlling access, and implementing any
+/// necessary cleanup, retention, archival, or deletion behavior.
+/// </remarks>
 public class Emailer
 {
     private static IEmailConfiguration? _configuration;
     private static EmailDomainSmtpLookup? _configuationSmptEndPoints;
     private readonly ILogger<Emailer>? _logger;
 
+    /// <remarks>
+    /// This library provides technical email-delivery functionality only.
+    /// It does not by itself make an application compliant with anti-spam laws,
+    /// privacy laws, consent requirements, unsubscribe requirements, retention rules,
+    /// provider policies, or other legal, regulatory, contractual, or organizational obligations.
+    ///
+    /// Applications using this library remain responsible for:
+    /// <list type="bullet">
+    /// <item><description>obtaining any required consent or authorization before sending email,</description></item>
+    /// <item><description>providing any required notices, sender identification, or unsubscribe handling,</description></item>
+    /// <item><description>complying with applicable retention, deletion, privacy, and security requirements, and</description></item>
+    /// <item><description>following the rules and technical requirements of the selected email provider or delivery environment.</description></item>
+    /// </list>
+    ///
+    /// Where this library writes message data to disk, logs, or other storage locations,
+    /// those outputs may contain recipient addresses, sender addresses, message bodies,
+    /// attachments, links, or other sensitive information. The consuming application is
+    /// responsible for securing those locations, controlling access, and implementing any
+    /// necessary cleanup, retention, archival, or deletion behavior.
+    /// </remarks>
     public static void ValidateConfiguration(IEmailConfiguration configuration)
     {
         EmailerConfigurationException.ThrowIfConfigurationError(configuration);
@@ -22,6 +62,26 @@ public class Emailer
         _configuationSmptEndPoints = new(configuration.EmailDomainSmtpEndpoints);
     }
 
+    /// <remarks>
+    /// This library provides technical email-delivery functionality only.
+    /// It does not by itself make an application compliant with anti-spam laws,
+    /// privacy laws, consent requirements, unsubscribe requirements, retention rules,
+    /// provider policies, or other legal, regulatory, contractual, or organizational obligations.
+    ///
+    /// Applications using this library remain responsible for:
+    /// <list type="bullet">
+    /// <item><description>obtaining any required consent or authorization before sending email,</description></item>
+    /// <item><description>providing any required notices, sender identification, or unsubscribe handling,</description></item>
+    /// <item><description>complying with applicable retention, deletion, privacy, and security requirements, and</description></item>
+    /// <item><description>following the rules and technical requirements of the selected email provider or delivery environment.</description></item>
+    /// </list>
+    ///
+    /// Where this library writes message data to disk, logs, or other storage locations,
+    /// those outputs may contain recipient addresses, sender addresses, message bodies,
+    /// attachments, links, or other sensitive information. The consuming application is
+    /// responsible for securing those locations, controlling access, and implementing any
+    /// necessary cleanup, retention, archival, or deletion behavior.
+    /// </remarks>
     public Emailer(ILogger<Emailer>? logger = null) => 
         _logger = logger;
 
@@ -194,6 +254,27 @@ public class Emailer
         return;
     }
 
+
+    /// <remarks>
+    /// This library provides technical email-delivery functionality only.
+    /// It does not by itself make an application compliant with anti-spam laws,
+    /// privacy laws, consent requirements, unsubscribe requirements, retention rules,
+    /// provider policies, or other legal, regulatory, contractual, or organizational obligations.
+    ///
+    /// Applications using this library remain responsible for:
+    /// <list type="bullet">
+    /// <item><description>obtaining any required consent or authorization before sending email,</description></item>
+    /// <item><description>providing any required notices, sender identification, or unsubscribe handling,</description></item>
+    /// <item><description>complying with applicable retention, deletion, privacy, and security requirements, and</description></item>
+    /// <item><description>following the rules and technical requirements of the selected email provider or delivery environment.</description></item>
+    /// </list>
+    ///
+    /// Where this library writes message data to disk, logs, or other storage locations,
+    /// those outputs may contain recipient addresses, sender addresses, message bodies,
+    /// attachments, links, or other sensitive information. The consuming application is
+    /// responsible for securing those locations, controlling access, and implementing any
+    /// necessary cleanup, retention, archival, or deletion behavior.
+    /// </remarks>
     public static async Task<EmailerResults> WriteEmailsToPickupDirectoryAsync(params IEnumerable<EmailMessage> emails)
     {
         EmailerConfigurationException.ThrowIfNull(_configuration);
@@ -213,6 +294,27 @@ public class Emailer
         return new EmailerResults();
     }
 
+    
+    /// <remarks>
+    /// This library provides technical email-delivery functionality only.
+    /// It does not by itself make an application compliant with anti-spam laws,
+    /// privacy laws, consent requirements, unsubscribe requirements, retention rules,
+    /// provider policies, or other legal, regulatory, contractual, or organizational obligations.
+    ///
+    /// Applications using this library remain responsible for:
+    /// <list type="bullet">
+    /// <item><description>obtaining any required consent or authorization before sending email,</description></item>
+    /// <item><description>providing any required notices, sender identification, or unsubscribe handling,</description></item>
+    /// <item><description>complying with applicable retention, deletion, privacy, and security requirements, and</description></item>
+    /// <item><description>following the rules and technical requirements of the selected email provider or delivery environment.</description></item>
+    /// </list>
+    ///
+    /// Where this library writes message data to disk, logs, or other storage locations,
+    /// those outputs may contain recipient addresses, sender addresses, message bodies,
+    /// attachments, links, or other sensitive information. The consuming application is
+    /// responsible for securing those locations, controlling access, and implementing any
+    /// necessary cleanup, retention, archival, or deletion behavior.
+    /// </remarks>
     public async Task<EmailerResults> SendEmailsAsync(params IEnumerable<EmailMessage> emails)
     {
         EmailerConfigurationException.ThrowIfNull(_configuration);
@@ -224,6 +326,26 @@ public class Emailer
         return results ?? throw new FormatException($"E-mailer configuration error. No delivery method enabled, please enable either {nameof(_configuration.UseNetworkDelivery)} or {_configuration.UsePickupDirectory}");
     }
 
+    /// <remarks>
+    /// This library provides technical email-delivery functionality only.
+    /// It does not by itself make an application compliant with anti-spam laws,
+    /// privacy laws, consent requirements, unsubscribe requirements, retention rules,
+    /// provider policies, or other legal, regulatory, contractual, or organizational obligations.
+    ///
+    /// Applications using this library remain responsible for:
+    /// <list type="bullet">
+    /// <item><description>obtaining any required consent or authorization before sending email,</description></item>
+    /// <item><description>providing any required notices, sender identification, or unsubscribe handling,</description></item>
+    /// <item><description>complying with applicable retention, deletion, privacy, and security requirements, and</description></item>
+    /// <item><description>following the rules and technical requirements of the selected email provider or delivery environment.</description></item>
+    /// </list>
+    ///
+    /// Where this library writes message data to disk, logs, or other storage locations,
+    /// those outputs may contain recipient addresses, sender addresses, message bodies,
+    /// attachments, links, or other sensitive information. The consuming application is
+    /// responsible for securing those locations, controlling access, and implementing any
+    /// necessary cleanup, retention, archival, or deletion behavior.
+    /// </remarks>
     //This is used by Identity to send HTML encoded emails, as such the IsBodyHtml flag is set accordingly.
     public async Task SendEmailAsync(string toEmailAddress, string subject, string htmlMessage)
     {

@@ -7,10 +7,26 @@
 
 ---
 
+## Important notice
+
+`Carrigan.Emailer` is a delivery library. It helps applications send email, but it does **not** by itself make an application compliant with anti-spam laws, marketing-email rules, privacy laws, retention rules, consent requirements, unsubscribe requirements, or platform/provider policies.
+
+Application developers remain responsible for ensuring that their use of this library complies with all applicable legal, regulatory, contractual, provider, and organizational requirements.
+
+Examples include, without limitation:
+
+- obtaining any required recipient consent
+- honoring unsubscribe or opt-out requests where required
+- providing any required sender identification, notices, or disclosures
+- complying with retention, deletion, and privacy obligations
+- following the terms and technical requirements of the selected email provider
+
+---
+
 ## What it does
 
 - **SMTP network delivery** using `MailKit.Net.Smtp.SmtpClient`
-- **Pickup directory delivery** (writes `.eml` messages to disk for testing / later processing)
+- **Pickup directory delivery** (writes `.eml` messages to disk for testing, local inspection, or other non-production scenarios)
 - **Multiple sender accounts** per host (groups by sender host and sender address)
 - Adds **List-Unsubscribe** header when provided
 - Uses `Microsoft.Extensions.Logging` (`ILogger<Emailer>`) for error logging
