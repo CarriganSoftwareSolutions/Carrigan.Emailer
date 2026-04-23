@@ -1,6 +1,6 @@
 ﻿# Carrigan.Emailer
 
-`Carrigan.Emailer` is a small, configuration-driven email sender for .NET that supports **SMTP delivery** (via MailKit) and an optional **pickup directory** mode (writes `.eml` files to disk).
+`Carrigan.Emailer` is a configuration-driven email sender for .NET that supports SMTP delivery through MailKit and an optional pickup-directory mode that writes `.eml` files to disk.
 
 - Target framework: `net10.0`
 - License: Apache-2.0
@@ -9,7 +9,8 @@
 
 ## Important notice
 
-`Carrigan.Emailer` is a delivery library. It helps applications send email, but it does **not** by itself make an application compliant with anti-spam laws, marketing-email rules, privacy laws, retention rules, consent requirements, unsubscribe requirements, or platform/provider policies.
+`Carrigan.Emailer` is a delivery library.
+It helps applications send email, but it does not by itself make an application compliant with anti-spam laws, marketing-email rules, privacy laws, retention rules, consent requirements, unsubscribe requirements, or provider policies.
 
 Application developers remain responsible for ensuring that their use of this library complies with all applicable legal, regulatory, contractual, provider, and organizational requirements.
 
@@ -18,25 +19,25 @@ Examples include, without limitation:
 - obtaining any required recipient consent
 - honoring unsubscribe or opt-out requests where required
 - providing any required sender identification, notices, or disclosures
-- complying with retention, deletion, and privacy obligations
+- complying with retention, deletion, privacy, and security obligations
 - following the terms and technical requirements of the selected email provider
 
 ---
 
 ## What it does
 
-- **SMTP network delivery** using `MailKit.Net.Smtp.SmtpClient`
-- **Pickup directory delivery** (writes `.eml` messages to disk for testing, local inspection, or other non-production scenarios)
-- **Multiple sender accounts** per host (groups by sender host and sender address)
-- Adds **List-Unsubscribe** header when provided
-- Uses `Microsoft.Extensions.Logging` (`ILogger<Emailer>`) for error logging
-- Returns a structured `EmailerResults` object for successes and failures
+- SMTP network delivery using `MailKit.Net.Smtp.SmtpClient`
+- Pickup-directory delivery that writes `.eml` files to disk
+- Domain-based SMTP endpoint mapping through `EmailDomainSmtpEndpoint`
+- Default sender support through `IEmailConfiguration.DefaultAccount`
+- Optional `Cc`, `Bcc`, and `Reply-To`
+- Optional `List-Unsubscribe` header support
+- `Microsoft.Extensions.Logging` integration through `ILogger<Emailer>`
+- Structured send results through `EmailerResults`
 
 ---
 
 ## Install
-
-NuGet:
 
 ```bash
 dotnet add package Carrigan.Emailer
@@ -46,52 +47,50 @@ dotnet add package Carrigan.Emailer
 
 ## Configuration
 
-`Carrigan.Emailer` uses a **static** configuration store internally. You must call:
+`Carrigan.Emailer` uses a static configuration store internally.
+Call:
 
 ```csharp
 Emailer.ValidateConfiguration(configuration);
 ```
 
-…once at startup **before** sending.
+once during startup before sending email.
 
-### Required: implement `IEmailConfiguration`
+### Implement `IEmailConfiguration`
 
 ```csharp
 using Carrigan.Emailer;
 
 public sealed class MyEmailConfiguration : IEmailConfiguration
 {
-    public EmailAddress? DefaultAccount { get; set; }
+    public EmailAddress? DefaultAccount { get; set; } = new("no-reply@example.com", "My App");
 
-    // Provide the SMTP password for a given sender address.
+    public IEnumerable<EmailDomainSmtpEndpoint> EmailDomainSmtpEndpoints { get; set; } =
+    [
+        new EmailDomainSmtpEndpoint
+        {
+            EmailDomain = "example.com",
+            SmtpServer = "smtp.example.com",
+            SmtpPort = 587
+        }
+    ];
+
+    public SecurityEnum? SecurityOption { get; set; } = SecurityEnum.Tls;
+
+    public string? PickupDirectory { get; set; }
+
+    public bool UsePickupDirectory { get; set; }
+
+    public bool? UseNetworkDelivery { get; set; } = true;
+
     public string? GetPasswordForAccount(string accountAddress)
     {
-        // IMPORTANT: Do not hardcode real credentials in source.
-        // Use environment variables, user-secrets, Key Vault, etc.
         return accountAddress switch
         {
             "no-reply@example.com" => Environment.GetEnvironmentVariable("EMAIL_NO_REPLY_PASSWORD"),
             _ => null
         };
     }
-
-    // Key: email host (EmailAddress.Host), Value: SMTP port
-    // Example: ["example.com"] = 587
-    public Dictionary<string, int> Hosts { get; set; } = new();
-
-    // Optional: map email host -> SMTP server host
-    // Example: ["example.com"] = "smtp.example.com"
-    public Dictionary<string, string> HostMappings { get; set; } = new();
-
-    public SecurityEnum? SecurityOption { get; set; } = SecurityEnum.Auto;
-
-    // Used when UsePickupDirectory = true
-    public string? PickupDirectory { get; set; }
-
-    public bool UsePickupDirectory { get; set; }
-
-    // Must be non-null; at least one of UsePickupDirectory or UseNetworkDelivery must be enabled.
-    public bool? UseNetworkDelivery { get; set; } = true;
 }
 ```
 
@@ -100,50 +99,44 @@ public sealed class MyEmailConfiguration : IEmailConfiguration
 ```csharp
 using Carrigan.Emailer;
 
-var config = new MyEmailConfiguration
+MyEmailConfiguration config = new()
 {
     DefaultAccount = new EmailAddress("no-reply@example.com", "My App"),
 
-    // If your email host differs from the SMTP server host, map it here.
-    HostMappings =
-    {
-        ["example.com"] = "smtp.example.com"
-    },
-
-    // Ports are keyed by the *email host* (EmailAddress.Host).
-    Hosts =
-    {
-        ["example.com"] = 587
-    },
+    EmailDomainSmtpEndpoints =
+    [
+        new EmailDomainSmtpEndpoint
+        {
+            EmailDomain = "example.com",
+            SmtpServer = "smtp.example.com",
+            SmtpPort = 587
+        }
+    ],
 
     SecurityOption = SecurityEnum.Tls,
-
     UseNetworkDelivery = true,
     UsePickupDirectory = false,
-
-    // Only required if UsePickupDirectory = true
     PickupDirectory = "C:\\maildrop"
 };
 
-// Throws EmailerConfigurationException (possibly with an AggregateException inner) if invalid.
 Emailer.ValidateConfiguration(config);
 ```
 
 ### What validation enforces
 
-`Emailer.ValidateConfiguration(...)` will throw if (among other checks):
+`Emailer.ValidateConfiguration(...)` will throw if, among other checks:
 
 - `DefaultAccount` is missing or invalid
-- `GetPasswordForAccount(DefaultAccount.Address)` returns null/empty
-- `Hosts` does not contain a port entry for `DefaultAccount.Host`
-- `SecurityOption` is null/invalid
 - `UseNetworkDelivery` is null
-- Neither network nor pickup delivery is enabled
-- Pickup directory is enabled but `PickupDirectory` is invalid/uncreatable
+- neither network nor pickup delivery is enabled
+- `SecurityOption` is null or invalid when network delivery is enabled
+- `GetPasswordForAccount(DefaultAccount.Address)` returns null or empty when network delivery is enabled
+- no matching `EmailDomainSmtpEndpoint` exists for `DefaultAccount.Host` when network delivery is enabled
+- pickup-directory mode is enabled but `PickupDirectory` is invalid or unusable
 
 ---
 
-## Sending email (SMTP)
+## Sending email
 
 ```csharp
 using Carrigan.Emailer;
@@ -154,7 +147,6 @@ ILogger<Emailer> logger = loggerFactory.CreateLogger<Emailer>();
 
 Emailer emailer = new(logger);
 
-// EmailMessage requires at least one body: htmlBody or textBody.
 EmailMessage message = new(
     id: Guid.NewGuid(),
     toAddress: "recipient@example.com",
@@ -167,20 +159,24 @@ EmailerResults results = await emailer.SendEmailsAsync(message);
 
 if (results.Errors.Any())
 {
-    // Network/host/account/email errors are aggregated here.
     throw new AggregateException("One or more emails failed to send.", results.Errors);
 }
 ```
 
 ### About `From`
 
-- If `EmailMessage.From` is null, `Carrigan.Emailer` will set it to `configuration.DefaultAccount` before sending.
+- If `EmailMessage.From` is null, the library uses `configuration.DefaultAccount`.
+
+### About message bodies
+
+- `EmailMessage` requires at least one body.
+- You may provide HTML, plain text, or both.
 
 ---
 
-## Pickup directory mode (write .eml files)
+## Pickup directory mode
 
-Enable pickup in configuration:
+Enable pickup-directory output in configuration:
 
 ```csharp
 config.UsePickupDirectory = true;
@@ -198,17 +194,15 @@ Pickup output structure:
 - `{PickupDirectory}/{recipientFolderName}/inbox/{timestamp}_{guid}.eml`
 - `{PickupDirectory}/{senderFolderName}/sent/{timestamp}_{guid}.eml`
 
-Where `{recipientFolderName}` is derived from the email address and sanitized for use as a folder name.
+Folder names are derived from email addresses and sanitized for use as paths.
 
-> Note: `WriteEmailsToPickupDirectoryAsync(...)` currently returns a new `EmailerResults()` without populating success/failure lists; pickup mode is primarily a “write files” operation.
+> Note: pickup-directory mode is primarily intended for development, testing, and local inspection scenarios. The library writes message files, but it does not manage retention, cleanup, archival, or directory security for you.
 
 ---
 
 ## List-Unsubscribe header
 
-If `EmailMessage.UnsubscribeOptions` contains one or more values, the library adds:
-
-`List-Unsubscribe: <value1>, <value2>, ...`
+If `EmailMessage.UnsubscribeOptions` contains one or more values, the library adds a `List-Unsubscribe` header.
 
 Example:
 
@@ -231,9 +225,9 @@ await emailer.SendEmailsAsync(newsletter);
 
 ---
 
-## Identity-style helper
+## Convenience helper
 
-For apps that use the common “send HTML email” pattern:
+For applications that use a simple HTML-email flow, `Emailer` also provides:
 
 ```csharp
 await emailer.SendEmailAsync(
@@ -249,37 +243,20 @@ If sending fails, it throws an `AggregateException` containing the underlying er
 
 ## Results and error handling
 
-`SendEmailsAsync(...)` returns `EmailerResults`:
+`SendEmailsAsync(...)` returns `EmailerResults`, which exposes:
 
 - `SuccessfulEmailIds`
 - `PermanentlyFailedEmailIds`
 - `PermanentlyFailedRecipients`
-- `OtherErrors`, `HostErrors`, `AccountErrors`, `EmailErrors`
-- `Errors` (all error lists concatenated)
-- `EmailIdsToDelete` (successful + permanently failed IDs)
+- `OtherErrors`
+- `HostErrors`
+- `AccountErrors`
+- `EmailErrors`
+- `Errors`
+- `EmailIdsToDelete`
 
 ---
 
-## Security notes
+## Current repository status
 
-- Do not commit real SMTP credentials.
-- Prefer environment variables, user secrets, or a secret manager.
-- Be mindful of provider rules (app passwords, OAuth, etc.).
-
----
-
-## Dependencies
-
-This package references:
-
-- `MailKit` (SMTP)
-- `Microsoft.Extensions.Logging.Abstractions`
-- `Carrigan.Core`
-
----
-
-## License
-
-Apache License 2.0.
-
-See `LICENSE`.
+The repository includes a test project, but it is currently a scaffold for future unit tests rather than a mature coverage suite.

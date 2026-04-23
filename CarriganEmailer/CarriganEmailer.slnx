@@ -4,10 +4,11 @@
     <File Path="../.github/workflows/publish-nuget.yml" />
     <File Path="../.github/workflows/pull-request-validation.yml" />
     <File Path="../.gitignore" />
+    <File Path="../CITATION.cff" />
+    <File Path="../CLA.md" />
     <File Path="../Directory.Build.props" />
     <File Path="../LICENSE" />
-    <File Path="CITATION.cff" />
-    <File Path="CLA.md" />
+    <File Path="../README.md" />
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="Carrigan.Emailer.Tests/Carrigan.Emailer.Tests.csproj" Id="e8e2164d-5745-4d07-af46-11723124eb48" />

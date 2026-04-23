@@ -13,7 +13,7 @@ url: "https://github.com/CarriganSoftwareSolutions/Carrigan.Emailer"
 abstract: "Carrigan.Emailer is a configuration-driven email sender for .NET using MailKit. Supports SMTP network delivery and optional pickup-directory (.eml) output, multi-account grouping by host/sender, List-Unsubscribe header support, and ILogger-based diagnostics."
 keywords:
   - "email"
-  = "smtp"
+  - "smtp"
   - "mailer"
   - "mailkit"
   - "mime"

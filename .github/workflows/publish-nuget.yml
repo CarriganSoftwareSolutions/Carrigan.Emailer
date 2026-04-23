@@ -31,14 +31,14 @@ jobs:
             10.0.x
 
       - name: Restore
-        run: dotnet restore CarriganEmailer/CarriganEmailer.sln
+        run: dotnet restore CarriganEmailer/CarriganEmailer.slnx
 
       - name: Build
-        run: dotnet build CarriganEmailer/CarriganEmailer.sln --configuration Release --no-restore
+        run: dotnet build CarriganEmailer/CarriganEmailer.slnx --configuration Release --no-restore
 
       - name: Test
         run: >-
-          dotnet test CarriganEmailer/Carrigan.Emailer.Test/Carrigan.Emailer.Test.csproj
+          dotnet test CarriganEmailer/Carrigan.Emailer.Test/Carrigan.Emailer.Tests.csproj
           --configuration Release
           --no-build
           --collect:"XPlat Code Coverage"
