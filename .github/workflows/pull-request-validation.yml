@@ -34,7 +34,7 @@ jobs:
 
       - name: Test
         run: >-
-          dotnet test CarriganEmailer/Carrigan.Emailer.Test/Carrigan.Emailer.Tests.csproj
+          dotnet test CarriganEmailer/Carrigan.Emailer.Tests/Carrigan.Emailer.Tests.csproj
           --configuration Release
           --no-build
           --collect:"XPlat Code Coverage"
