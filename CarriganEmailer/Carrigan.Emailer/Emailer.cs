@@ -7,6 +7,8 @@ using Microsoft.Extensions.Logging;
 using MimeKit;
 using System.ComponentModel;
 
+//IGNORE SPELLING: SMTP, bcc
+
 namespace Carrigan.Emailer;
 
 /// <remarks>
@@ -32,7 +34,7 @@ namespace Carrigan.Emailer;
 public class Emailer
 {
     private static IEmailConfiguration? _configuration;
-    private static EmailDomainSmtpLookup? _configuationSmptEndPoints;
+    private static EmailDomainSmtpLookup? _configurationSmtpEndPoints;
     private readonly ILogger<Emailer>? _logger;
 
     /// <remarks>
@@ -59,7 +61,7 @@ public class Emailer
     {
         EmailerConfigurationException.ThrowIfConfigurationError(configuration);
         _configuration = configuration;
-        _configuationSmptEndPoints = new(configuration.EmailDomainSmtpEndpoints);
+        _configurationSmtpEndPoints = new(configuration.EmailDomainSmtpEndpoints);
     }
 
     /// <remarks>
@@ -139,35 +141,36 @@ public class Emailer
     internal async Task<EmailStatusRecord> SendEmailNetworkAsync(EmailMessage email, SmtpClient client)
     {
         Guid emailId = email.Id;
-        MimeMessage mimeMessage;
+        ;
         try
-        { 
-            mimeMessage = GetMimeMessageFromEmail(email);
+        {
+            using MimeMessage mimeMessage = GetMimeMessageFromEmail(email);
+
+            try
+            {
+                await client.SendAsync(mimeMessage);
+                return new EmailStatusRecord(EmailStatusEnum.Success, email.Id);
+            }
+            catch (SmtpCommandException ex) when (ex.StatusCode == SmtpStatusCode.MailboxUnavailable)
+            {
+                string failedAddress = ex.Mailbox?.Address ?? "null";
+                _logger?.LogError(ex, "Permanent delivery failure for email address: {failedAddress} for email id of {emailId}", failedAddress, emailId);
+                return new EmailStatusRecord(EmailStatusEnum.PermanentAddressFailure, email.Id, new EmailAddress(failedAddress), ex);
+            }
+            catch (Exception ex) when (ex is ArgumentException || ex is ArgumentNullException || ex is InvalidOperationException)
+            {
+                _logger?.LogError(ex, "Email id of {emailId} failed due to a possible formatting error.", emailId);
+                return new EmailStatusRecord(EmailStatusEnum.PermanentFormatFailure, email.Id, ex);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Email id of {emailId} failed and will be retried later if it hasn't expired.", emailId);
+                return new EmailStatusRecord(EmailStatusEnum.TransientFailure, email.Id, ex);
+            }
         }
         catch(Exception ex)
         {
             return new EmailStatusRecord(EmailStatusEnum.PermanentFormatFailure, email.Id, ex);
-        }
-        try
-        {
-            await client.SendAsync(mimeMessage);
-            return new EmailStatusRecord(EmailStatusEnum.Success, email.Id);
-        }
-        catch (SmtpCommandException ex) when (ex.StatusCode == SmtpStatusCode.MailboxUnavailable)
-        {
-            string failedAddress = ex.Mailbox?.Address ?? "null";
-            _logger?.LogError(ex, "Permanent delivery failure for email address: {failedAddress} for email id of {emailId}", failedAddress, emailId);
-            return new EmailStatusRecord(EmailStatusEnum.PermanentAddressFailure, email.Id, new EmailAddress(failedAddress), ex);
-        }
-        catch (Exception ex) when (ex is ArgumentException || ex is ArgumentNullException || ex is InvalidOperationException)
-        {
-            _logger?.LogError(ex, "Email id of {emailId} failed due to a possible formatting error.", emailId);
-            return new EmailStatusRecord(EmailStatusEnum.PermanentFormatFailure, email.Id, ex);
-        }
-        catch (Exception ex)
-        {
-            _logger?.LogError(ex, "Email id of {emailId} failed and will be retried later if it hasn't expired.", emailId);
-            return new EmailStatusRecord(EmailStatusEnum.TransientFailure, email.Id, ex);
         }
     }
 
@@ -180,23 +183,24 @@ public class Emailer
         {
             email.From ??= defaultFrom;
         }
+
+        using SmtpClient client = new();
         try
         {
             // Group emails by host (using sender's host or default)
             foreach (IGrouping<string, EmailMessage> hostGroup in emails.GroupBy(email => email.From?.Host ?? throw new NullReferenceException("All emails require a from address.")))
             {
-                using SmtpClient client = new();
                 try
                 {
                     string emailDomain = hostGroup.Key;
-                    EmailDomainSmtpEndpoint? emailDomainSmtpEndpoint = _configuationSmptEndPoints?.Lookup(emailDomain) ?? throw new NullReferenceException($"Attempted to send an email from a domain name, {emailDomain}, that doesn't have a mapped SMPT server.");
-                    string smptServerHost = emailDomainSmtpEndpoint.SmtpServer;
-                    int smptPort = emailDomainSmtpEndpoint.SmtpPort;
+                    EmailDomainSmtpEndpoint? emailDomainSmtpEndpoint = _configurationSmtpEndPoints?.Lookup(emailDomain) ?? throw new NullReferenceException($"Attempted to send an email from a domain name, {emailDomain}, that doesn't have a mapped SMPT server.");
+                    string smtpServerHost = emailDomainSmtpEndpoint.SmtpServer;
+                    int smtpPort = emailDomainSmtpEndpoint.SmtpPort;
                     SecureSocketOptions secureSocketOption = GetSocketSecurityOption();
                     string secureSocketOptionString = secureSocketOption.ToString();
                     try
                     {
-                        await client.ConnectAsync(smptServerHost, smptPort, secureSocketOption);
+                        await client.ConnectAsync(smtpServerHost, smtpPort, secureSocketOption);
                         // Now group within the host by sender address
                         foreach (IGrouping<string, EmailMessage> addressGroup in hostGroup.GroupBy(email => email.From?.Address ?? throw new NullReferenceException("All emails require a from address.")))
                         {
@@ -218,7 +222,7 @@ public class Emailer
                     }
                     catch (Exception ex)
                     {
-                        _logger?.LogError(ex, "Attempt to send emails from the host, {smptServerHost}, on port, {smptServerHost}, using Secure Socket Option, {secureSocketOptionString}, failed.", smptServerHost, smptPort, secureSocketOptionString.ToString());
+                        _logger?.LogError(ex, "Attempt to send emails from the host, {smptServerHost}, on port, {smtpPort}, using Secure Socket Option, {secureSocketOptionString}, failed.", smtpServerHost, smtpPort, secureSocketOptionString.ToString());
                         results.HostErrors.Add(ex);
                     }
                     await client.DisconnectAsync(true);
@@ -249,7 +253,7 @@ public class Emailer
         Directory.CreateDirectory(directoryPath);
 
         using FileStream stream = new(filePath, FileMode.CreateNew, FileAccess.Write, FileShare.None, 4096, useAsync: true);
-        MimeMessage mimeMessage = GetMimeMessageFromEmail(email);
+        using MimeMessage mimeMessage = GetMimeMessageFromEmail(email);
         await Task.Run(() => mimeMessage.WriteTo(stream));
         return;
     }

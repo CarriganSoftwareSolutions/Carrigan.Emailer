@@ -1,6 +1,8 @@
 ﻿using System.Collections.ObjectModel;
 using Carrigan.Core.Extensions;
 
+//IGNORE SPELLING: SMTP
+
 namespace Carrigan.Emailer;
 
 internal sealed class EmailDomainSmtpLookup

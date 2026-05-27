@@ -1,5 +1,7 @@
 ﻿namespace Carrigan.Emailer;
 
+//IGNORE SPELLING: SMTP
+
 public sealed record class EmailDomainSmtpEndpoint
 {
     public required string EmailDomain { get; init; }

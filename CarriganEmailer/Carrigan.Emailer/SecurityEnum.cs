@@ -1,5 +1,6 @@
-﻿namespace Carrigan.Emailer;
+﻿//IGNORE SPELLING: Ssl, Tls
 
+namespace Carrigan.Emailer;
 
 /// <remarks>
 /// Selects how the library should negotiate or require transport security when sending

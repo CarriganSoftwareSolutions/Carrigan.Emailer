@@ -4,6 +4,8 @@ dotnet_diagnostic.EXTO001.severity = error
 
 # C# files
 [*.cs]
+#IDisposable
+dotnet_diagnostic.CA2000.severity = warning
 
 #### Core EditorConfig Options ####
 

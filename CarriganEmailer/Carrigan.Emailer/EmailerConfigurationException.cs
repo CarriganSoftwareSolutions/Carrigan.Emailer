@@ -1,4 +1,4 @@
-﻿// Ignore Spelling: Emailer
+﻿// Ignore Spelling: Emailer, Smtp
 
 using Carrigan.Core.Extensions;
 using System.ComponentModel;

@@ -1,6 +1,4 @@
-﻿
-using Carrigan.Emailer;
-
+﻿//Ignore Spelling: Smtp
 namespace Carrigan.Emailer;
 public interface IEmailConfiguration
 {
