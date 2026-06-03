@@ -22,12 +22,12 @@
     <Deterministic>true</Deterministic>
 
     <!-- PreRelease Status -->
-    <PreReleaseLabel></PreReleaseLabel>
+    <PreReleaseLabel>alpha</PreReleaseLabel>
 
     <!--Base Version for other projects-->
-    <BaseVersion>0.1.1</BaseVersion>
+    <BaseVersion>0.1.2</BaseVersion>
     <!-- Base version: x.y.z For Carrigan.Core -->
-    <EmailerVersionBase>0.1.1</EmailerVersionBase>
+    <EmailerVersionBase>0.1.2</EmailerVersionBase>
     
     <!-- Time Stamp -->
     <BuildTimeStamp>$([System.DateTime]::UtcNow.ToString('yyyyMMddHHmm'))</BuildTimeStamp>
