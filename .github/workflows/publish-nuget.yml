@@ -3,7 +3,7 @@ name: Publish to NuGet (version/0.x)
 on:
   push:
     branches:
-      - version/0.x
+      - version/**
   workflow_dispatch:
 
 permissions:
