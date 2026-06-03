@@ -25,9 +25,9 @@
     <PreReleaseLabel></PreReleaseLabel>
 
     <!--Base Version for other projects-->
-    <BaseVersion>0.1.0</BaseVersion>
+    <BaseVersion>0.1.1</BaseVersion>
     <!-- Base version: x.y.z For Carrigan.Core -->
-    <EmailerVersionBase>0.1.0</EmailerVersionBase>
+    <EmailerVersionBase>0.1.1</EmailerVersionBase>
     
     <!-- Time Stamp -->
     <BuildTimeStamp>$([System.DateTime]::UtcNow.ToString('yyyyMMddHHmm'))</BuildTimeStamp>
