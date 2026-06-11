@@ -7,8 +7,7 @@ It supports SMTP delivery and a pickup-directory mode that writes `.eml` files t
 
 This repository is in early development.
 
-- Current package target: `net10.0`
-- Current versioning is pre-release (`alpha`)
+- Current package targets: `net9.0` and `net10.0`
 - The test project currently exists as a scaffold for future coverage
 - The library API is usable, but the repository is still being hardened for broader public consumption
 

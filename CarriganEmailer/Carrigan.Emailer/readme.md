@@ -2,7 +2,8 @@
 
 `Carrigan.Emailer` is a configuration-driven email sender for .NET that supports SMTP delivery through MailKit and an optional pickup-directory mode that writes `.eml` files to disk.
 
-- Target framework: `net10.0`
+
+- Current package targets: `net9.0` and `net10.0`
 - License: Apache-2.0
 
 ---

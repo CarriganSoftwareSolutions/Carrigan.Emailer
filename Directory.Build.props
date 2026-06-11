@@ -26,7 +26,7 @@
 
     <!--Base Version for other projects-->
     <BaseVersion>0.1.2</BaseVersion>
-    <!-- Base version: x.y.z For Carrigan.Core -->
+    <!-- Base version: x.y.z For Carrigan.Emailer -->
     <EmailerVersionBase>0.1.2</EmailerVersionBase>
     
     <!-- Time Stamp -->
