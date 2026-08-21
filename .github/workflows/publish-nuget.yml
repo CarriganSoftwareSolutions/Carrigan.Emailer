@@ -31,15 +31,15 @@ jobs:
             10.0.x
 
       - name: Restore
-        run: dotnet restore CarriganCore/CarriganCore.sln
+        run: dotnet restore CarriganEmailer/CarriganEmailer.slnx
 
       - name: Build
-        run: dotnet build CarriganCore/CarriganCore.sln --configuration Release --no-restore
+        run: dotnet build CarriganEmailer/CarriganEmailer.slnx --configuration Release --no-restore
 
       - name: Test
         run: >-
           dotnet test
-          --project CarriganCore/Carrigan.Core.Test/Carrigan.Core.Test.csproj
+          --project CarriganEmailer/Carrigan.Emailer.Tests/Carrigan.Emailer.Tests.csproj
           --configuration Release
           --no-build
           --results-directory TestResults
@@ -55,7 +55,7 @@ jobs:
           name: test-results
           path: |
             **/TestResults/**/*.trx
-            **/TestResults/**/coverage.cobertura.xml
+            **/TestResults/**/coverage.cobertura.*.xml
           if-no-files-found: warn
 
   build-pack:
@@ -78,14 +78,14 @@ jobs:
             10.0.x
 
       - name: Restore
-        run: dotnet restore CarriganCore/CarriganCore.sln
+        run: dotnet restore CarriganEmailer/CarriganEmailer.slnx
 
       - name: Build
-        run: dotnet build CarriganCore/CarriganCore.sln --configuration Release --no-restore
+        run: dotnet build CarriganEmailer/CarriganEmailer.slnx --configuration Release --no-restore
 
       - name: Pack solution
         run: >-
-          dotnet pack CarriganCore/CarriganCore.sln
+          dotnet pack CarriganEmailer/CarriganEmailer.slnx
           --configuration Release
           --no-build
           -o ./artifacts
@@ -142,7 +142,7 @@ jobs:
       - name: Publish symbols to NuGet
         shell: bash
         run: |
-          find ./artifacts -maxdepth 1 -type f -name '*.snupkg' ! -name 'Carrigan.Core.Analyzers*.snupkg' -print0 |
+          find ./artifacts -maxdepth 1 -type f -name '*.snupkg' -print0 |
           while IFS= read -r -d '' file; do
             dotnet nuget push "$file" \
               --api-key "$NUGET_API_KEY" \
@@ -181,7 +181,7 @@ jobs:
       - name: Publish symbols to NuGet
         shell: bash
         run: |
-          find ./artifacts -maxdepth 1 -type f -name '*.snupkg' ! -name 'Carrigan.Core.Analyzers*.snupkg' -print0 |
+          find ./artifacts -maxdepth 1 -type f -name '*.snupkg' -print0 |
           while IFS= read -r -d '' file; do
             dotnet nuget push "$file" \
               --api-key "$NUGET_API_KEY" \
