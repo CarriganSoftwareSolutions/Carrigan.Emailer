@@ -27,18 +27,22 @@ jobs:
             10.0.x
 
       - name: Restore
-        run: dotnet restore CarriganEmailer/CarriganEmailer.slnx
+        run: dotnet restore CarriganCore/CarriganCore.sln
 
       - name: Build
-        run: dotnet build CarriganEmailer/CarriganEmailer.slnx --configuration Release --no-restore
+        run: dotnet build CarriganCore/CarriganCore.sln --configuration Release --no-restore
 
       - name: Test
         run: >-
-          dotnet test CarriganEmailer/Carrigan.Emailer.Tests/Carrigan.Emailer.Tests.csproj
+          dotnet test
+          --project CarriganCore/Carrigan.Core.Test/Carrigan.Core.Test.csproj
           --configuration Release
           --no-build
-          --collect:"XPlat Code Coverage"
-          --logger "trx;LogFileName=test-results.trx"
+          --results-directory TestResults
+          --coverlet
+          --coverlet-output-format cobertura
+          --report-xunit-trx
+          --report-xunit-trx-filename test-results.trx
 
       - name: Upload test results
         if: always()

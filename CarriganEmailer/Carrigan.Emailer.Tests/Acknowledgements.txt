@@ -1,0 +1,44 @@
+﻿
+This repository uses a number of third-party libraries, frameworks, and tools.
+Their work is sincerely appreciated.
+
+This file is provided for informational and courtesy purposes only.
+It is not intended to replace, modify, or restate the license terms of any
+third-party dependency. For complete and authoritative licensing information,
+please refer to the applicable package metadata, license files, notice files,
+and upstream project repositories.
+
+Projects in this repository may rely on technologies and packages from the
+broader .NET ecosystem and other open-source contributors, including but not
+limited to:
+
+- Microsoft.NETCore.App  
+    © Microsoft Corporation  
+    Licensed under the MIT License  
+    https://github.com/dotnet/runtime/blob/main/LICENSE.TXT
+    https://github.com/dotnet/runtime/blob/main/THIRD-PARTY-NOTICES.TXT
+
+- coverlet.mtp  
+    © Contributors  
+    Licensed under the MIT License  
+    https://github.com/coverlet-coverage/coverlet/blob/master/LICENSE
+    https://github.com/coverlet-coverage/coverlet/blob/master/THIRD-PARTY-NOTICES.txt
+
+- xUnit.v3  
+    © James Newkirk, Brad Wilson, and xUnit contributors  
+    Licensed under the Apache License, Version 2.0  
+    https://github.com/xunit/xunit/blob/main/LICENSE
+
+Unless otherwise expressly stated in a given package or distribution, references
+to third-party dependencies in this repository generally refer to dependencies
+that are restored, resolved, or loaded separately through normal package or
+framework mechanisms and are not bundled or redistributed as part of this
+repository's NuGet packages.
+
+Accordingly, the inclusion of a reference to a third-party dependency in this
+repository should not be interpreted to mean that the dependency's binaries,
+source code, assets, license files, or notice files are included within a
+particular package produced by this repository.
+
+Special thanks to the authors, maintainers, and contributors of these and
+other open-source projects whose work helps make this software possible.
