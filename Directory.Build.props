@@ -22,7 +22,7 @@
     <Deterministic>true</Deterministic>
 
     <!-- PreRelease Status -->
-    <PreReleaseLabel>alpha</PreReleaseLabel>
+    <PreReleaseLabel></PreReleaseLabel>
 
     <!--Base Version for other projects-->
     <BaseVersion>0.1.4</BaseVersion>
