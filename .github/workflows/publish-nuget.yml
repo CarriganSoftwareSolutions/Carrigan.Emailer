@@ -199,6 +199,7 @@ jobs:
               --skip-duplicate \
               --no-symbols
           done
+          
 
       - name: Publish symbols to NuGet
         shell: bash
