@@ -6,7 +6,7 @@ authors:
   - family-names: "Carrigan"
     given-names: "Jonathan"
     alias: "Carrigan Software Solutions LLC"
-version: "0.1.5"
+version: "0.1.6-alpha"
 date-released: "2026-09-25"
 repository-code: "https://github.com/CarriganSoftwareSolutions/Carrigan.Emailer"
 url: "https://github.com/CarriganSoftwareSolutions/Carrigan.Emailer"
