@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using Carrigan.Core.Extensions;
 
 //IGNORE SPELLING: SMTP
@@ -41,14 +41,14 @@ internal sealed class EmailDomainSmtpLookup
                     exceptions.Add(new ArgumentException("SmtpServer cannot be null, empty, or whitespace.", nameof(endpoints)));
                 }
 
-                if (endpoint.SmtpPort <= 0)
+                if (endpoint.SmtpPort is < 1 or > 65535)
                 {
-                    exceptions.Add(new ArgumentOutOfRangeException(nameof(endpoints), "SmtpPort must be greater than zero."));
+                    exceptions.Add(new ArgumentOutOfRangeException(nameof(endpoints), "SmtpPort must be between 1 and 65535."));
                 }
 
                 if (endpoint.EmailDomain.IsNotNullOrWhiteSpace()
                     && endpoint.SmtpServer.IsNotNullOrWhiteSpace()
-                    && endpoint.SmtpPort > 0
+                    && endpoint.SmtpPort is >= 1 and <= 65535
                     && dictionary.DoesNotContainKey(endpoint.EmailDomain))
                 {
                     dictionary.Add(endpoint.EmailDomain, endpoint);

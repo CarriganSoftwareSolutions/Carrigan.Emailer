@@ -7,9 +7,13 @@ It supports SMTP delivery and a pickup-directory mode that writes `.eml` files t
 
 This repository is in early development.
 
-- Current package targets: `net9.0` and `net10.0`
-- The test project currently exists as a scaffold for future coverage
+- Current package targets: `net9.0`, `net10.0`, and `net11.0`
+- Unit tests cover validation, message building, SMTP endpoint lookup, results, and offline pickup-directory delivery
 - The library API is usable, but the repository is still being hardened for broader public consumption
+
+## Framework compatibility and support
+
+Carrigan.Emailer provides .NET 9 binaries to maintain compatibility with existing applications, but Microsoft ended support for .NET 9 on November 10, 2026. Frameworks no longer supported by Microsoft are **not officially supported by Carrigan Software Solutions LLC**; binaries are supplied as-is, without guaranteed testing, fixes, security updates, or technical support for those frameworks. We recommend .NET 10 or .NET 11 for new development.
 
 ## Features
 
@@ -25,7 +29,7 @@ This repository is in early development.
 ## Repository layout
 
 - `CarriganEmailer/Carrigan.Emailer/` - main library project
-- `CarriganEmailer/Carrigan.Emailer.Tests/` - xUnit test project scaffold
+- `CarriganEmailer/Carrigan.Emailer.Tests/` - offline xUnit v3 test suite
 - `.github/workflows/` - GitHub Actions workflows
 - `LICENSE` - Apache 2.0 license for the repository
 
@@ -128,8 +132,7 @@ If you enable pickup-directory mode, your application remains responsible for:
 
 ## Testing
 
-The repository includes an xUnit test project, but it is currently only a scaffold.
-That is intentional at this stage and should not be read as a claim of meaningful automated coverage yet.
+The repository includes an offline xUnit v3 test suite for .NET 9, 10, and 11. Tests do not send network email or contact SMTP servers.
 
 ## Legal and operational notice
 

@@ -1,4 +1,4 @@
-﻿// Ignore Spelling: Emailer, Smtp
+// Ignore Spelling: Emailer, Smtp
 
 using Carrigan.Core.Extensions;
 using System.ComponentModel;
@@ -117,9 +117,7 @@ public sealed class EmailerConfigurationException : Exception
                 {
                     exceptions.Add(CaptureException(new FormatException("You must provide a password for the default email account.")));
                 }
-                if (configuration.EmailDomainSmtpEndpoints
-                        .Where(domain => domain.EmailDomain.Equals(configuration.DefaultAccount.Host, StringComparison.OrdinalIgnoreCase))
-                        .None())
+                if (domainSmtpLookup?.DoesNotContainDomain(configuration.DefaultAccount.Host) != false)
                 {
                     exceptions.Add(CaptureException(new FormatException("You must provide an SMTP endpoint for the default email account.")));
                 }

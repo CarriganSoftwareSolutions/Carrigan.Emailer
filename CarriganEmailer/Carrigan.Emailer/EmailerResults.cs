@@ -1,4 +1,4 @@
-﻿//Ignore Spelling: Emailer
+//Ignore Spelling: Emailer
 using Carrigan.Emailer;
 
 namespace Carrigan.Emailer;
@@ -13,7 +13,7 @@ public class EmailerResults
     public List<Exception> AccountErrors { get; set; } = [];
     public List<Exception> EmailErrors { get; set; } = [];
     public IEnumerable<Guid> EmailIdsToDelete => 
-        PermanentlyFailedEmailIds.Distinct().AsEnumerable().Concat(SuccessfulEmailIds.AsEnumerable());
+        PermanentlyFailedEmailIds.Concat(SuccessfulEmailIds).Distinct();
     public IEnumerable<Exception> Errors => 
         OtherErrors.Concat(HostErrors).Concat(AccountErrors).Concat(EmailErrors);
     internal void Add(EmailStatusRecord status)

@@ -1,4 +1,4 @@
-﻿//Ignore Spelling: Bcc emailer
+//Ignore Spelling: Bcc emailer
 using Carrigan.Core.Extensions;
 
 namespace Carrigan.Emailer;
@@ -14,23 +14,24 @@ public class EmailMessage
     {
         ArgumentNullException.ThrowIfNull(to);
         ArgumentNullException.ThrowIfNull(subject);
-        if (to.None())
+        EmailAddress[] recipients = to.ToArray();
+        if (recipients.Length == 0)
             throw new ArgumentException("At least one To address is required.", nameof(to));
-        if(subject.IsWhiteSpace())
+        if (string.IsNullOrWhiteSpace(subject))
             throw new ArgumentException("You must provide a subject.", nameof(subject));
         if (htmlBody.IsNullOrWhiteSpace() && textBody.IsNullOrWhiteSpace())
             throw new ArgumentException("Either htmlBody or textBody must be provided.");
 
         Id = id;
         From = from;
-        To = to;
-        Cc = cc ?? [];
-        Bcc = bcc ?? [];
-        ReplyTo = replyTo ?? [];
+        To = recipients;
+        Cc = cc?.ToArray() ?? [];
+        Bcc = bcc?.ToArray() ?? [];
+        ReplyTo = replyTo?.ToArray() ?? [];
         Subject = subject;
         HtmlBody = htmlBody ?? string.Empty;
         TextBody = textBody ?? string.Empty;
-        UnsubscribeOptions = unsubscribeOptions ?? [];
+        UnsubscribeOptions = unsubscribeOptions?.ToArray() ?? [];
     }
 
     public Guid Id { get; set; }

@@ -29,6 +29,7 @@ jobs:
           dotnet-version: |
             9.0.x
             10.0.x
+            11.0.x
 
       - name: Restore
         run: dotnet restore CarriganEmailer/CarriganEmailer.slnx
@@ -43,10 +44,13 @@ jobs:
           --configuration Release
           --no-build
           --results-directory TestResults
+          --results-directory-layout per-module
+          --minimum-expected-tests 1
           --coverlet
           --coverlet-output-format cobertura
           --report-xunit-trx
           --report-xunit-trx-filename test-results.trx
+          -- --minimum-expected-tests 1
 
       - name: Upload test results
         if: always()
@@ -76,6 +80,7 @@ jobs:
           dotnet-version: |
             9.0.x
             10.0.x
+            11.0.x
 
       - name: Restore
         run: dotnet restore CarriganEmailer/CarriganEmailer.slnx

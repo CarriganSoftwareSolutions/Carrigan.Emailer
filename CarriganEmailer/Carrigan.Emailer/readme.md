@@ -1,10 +1,16 @@
-﻿# Carrigan.Emailer
+# Carrigan.Emailer
 
 `Carrigan.Emailer` is a configuration-driven email sender for .NET that supports SMTP delivery through MailKit and an optional pickup-directory mode that writes `.eml` files to disk.
 
 
-- Current package targets: `net9.0` and `net10.0`
+- Current package targets: `net9.0`, `net10.0`, and `net11.0`
 - License: Apache-2.0
+
+---
+
+## Framework support
+
+Microsoft ended support for .NET 9 on November 10, 2026. We continue providing .NET 9 binaries for existing applications, but framework targets no longer supported by Microsoft are **not officially supported by Carrigan Software Solutions LLC**. Such binaries are provided as-is; framework-specific testing, fixes, security updates, and technical support are not guaranteed. We recommend .NET 10 or .NET 11 for new applications.
 
 ---
 
@@ -260,7 +266,7 @@ If sending fails, it throws an `AggregateException` containing the underlying er
 
 ## Current repository status
 
-The repository includes a test project, but it is currently a scaffold for future unit tests rather than a mature coverage suite.
+The repository includes offline xUnit v3 tests for validation, message conversion, SMTP endpoint mapping, results, and pickup-directory output. Test runs do not contact SMTP servers or send real email.
 
 ## Support Development
 

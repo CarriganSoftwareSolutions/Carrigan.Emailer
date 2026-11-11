@@ -1,6 +1,7 @@
 ﻿//Ignore spelling: Emailer
 
 using Carrigan.Core.Extensions;
+using MailKit;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Logging;
@@ -130,7 +131,7 @@ public class Emailer
         else if (email.HtmlBody.IsNullOrWhiteSpace() && email.TextBody.IsNotNullOrWhiteSpace())
             mimeMessage.Body = new TextPart("plain") { Text = email.TextBody };
         else
-            throw new FormatException($"You must provide at least one message body either as a {nameof(email.HtmlBody)} or a {nameof(email.HtmlBody)}.");
+            throw new FormatException($"You must provide at least one message body either as a {nameof(email.HtmlBody)} or a {nameof(email.TextBody)}.");
 
         if (email.UnsubscribeOptions.Any())
             mimeMessage.Headers.Add($"List-Unsubscribe", string.Join(", ", email.UnsubscribeOptions.Select(value => $"<{value}>")));
@@ -141,14 +142,19 @@ public class Emailer
     internal async Task<EmailStatusRecord> SendEmailNetworkAsync(EmailMessage email, SmtpClient client)
     {
         Guid emailId = email.Id;
-        ;
         try
         {
             using MimeMessage mimeMessage = GetMimeMessageFromEmail(email);
 
             try
             {
-                await client.SendAsync(mimeMessage);
+                SendResult sendResult = await client.SendAsync(mimeMessage);
+                if (sendResult.RejectedRecipients.Count != 0)
+                {
+                    InvalidOperationException exception = new("The SMTP server rejected one or more recipients.");
+                    _logger?.LogError(exception, "SMTP rejected recipients for email id {emailId}", emailId);
+                    return new EmailStatusRecord(EmailStatusEnum.TransientFailure, email.Id, exception);
+                }
                 return new EmailStatusRecord(EmailStatusEnum.Success, email.Id);
             }
             catch (SmtpCommandException ex) when (ex.StatusCode == SmtpStatusCode.MailboxUnavailable)
@@ -286,6 +292,7 @@ public class Emailer
         {
             string directoryPath = _configuration.PickupDirectory ?? throw new NullReferenceException("Email drop directory not provided.");
 
+            EmailerResults results = new();
             foreach (EmailMessage email in emails)
             {
                 foreach (EmailAddress address in email.To.Concat(email.Bcc).Concat(email.Cc).Distinct())
@@ -293,7 +300,9 @@ public class Emailer
                     await WriteEmailToAddressPath(directoryPath, address, "inbox", email);
                 }
                 await WriteEmailToAddressPath(directoryPath, email.From ?? _configuration?.DefaultAccount, "sent", email);
+                results.Add(new EmailStatusRecord(EmailStatusEnum.Success, email.Id));
             }
+            return results;
         }
         return new EmailerResults();
     }
